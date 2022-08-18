@@ -178,19 +178,21 @@
 <main class="container-fluid">
     <div class="row">
         <div class="coL-12 col-sm-6 order-2 order-sm-1">
-            <table class="table table-striped table-hover align-middle">
+            <table class="table table-striped table-hover align-middle mt-2 mt-sm-0">
                 <thead>
                 <tr v-scope @vue:mounted="init" v-cloak>
                     <th scope="col" @click="toggleSort()">
                         Folders
                         <i class="bi" v-bind:class="{'bi-caret-down-fill': sort == 'desc', 'bi-caret-up-fill': sort == 'asc'}"></i>
                     </th>
-                    <th scope="col" colspan="2" class="text-end w-35" v-scope v-cloak>
-                        <button type="button" class="btn btn-outline-secondary btn-sm play-all-btn" @click="playAll(true)"><i class="bi bi-shuffle"></i> Rand.</button>
+                    <th scope="col" class="text-end" v-scope v-cloak>
+                        <button type="button" class="btn btn-outline-secondary btn-sm play-all-btn" @click="playAll(true)"><i class="bi bi-shuffle"></i> Random</button>
                         <button type="button" class="btn btn-secondary btn-sm play-all-btn" @click="playAll()"><i class="bi bi-play-circle"></i> All</button>
                     </th>
                 </tr>
                 </thead>
+            </table>
+            <table class="table table-striped table-hover align-middle">
                 <tbody v-scope v-cloak>
                 {% verbatim %}
                     <tr v-for="(folder, key) in foldersSorted" v-bind:class="{'table-primary': folder.dir === selected_folder}">
