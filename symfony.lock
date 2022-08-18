@@ -8,33 +8,6 @@
             "ref": "64d8583af5ea57b7afa4aba4b159907f3a148b05"
         }
     },
-    "doctrine/doctrine-bundle": {
-        "version": "2.7",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "2.4",
-            "ref": "ddddd8249dd55bbda16fa7a45bb7499ef6f8e90e"
-        },
-        "files": [
-            "./config/packages/doctrine.yaml",
-            "./src/Entity/.gitignore",
-            "./src/Repository/.gitignore"
-        ]
-    },
-    "doctrine/doctrine-migrations-bundle": {
-        "version": "3.2",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "3.1",
-            "ref": "ee609429c9ee23e22d6fa5728211768f51ed2818"
-        },
-        "files": [
-            "./config/packages/doctrine_migrations.yaml",
-            "./migrations/.gitignore"
-        ]
-    },
     "phpunit/phpunit": {
         "version": "9.5",
         "recipe": {
@@ -137,18 +110,6 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
-    "symfony/messenger": {
-        "version": "6.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "6.0",
-            "ref": "2523f7d31488903e247a522e760dc279be7f7aaf"
-        },
-        "files": [
-            "./config/packages/messenger.yaml"
-        ]
-    },
     "symfony/monolog-bundle": {
         "version": "3.8",
         "recipe": {
@@ -159,18 +120,6 @@
         },
         "files": [
             "./config/packages/monolog.yaml"
-        ]
-    },
-    "symfony/notifier": {
-        "version": "6.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "5.0",
-            "ref": "c31585e252b32fe0e1f30b1f256af553f4a06eb9"
-        },
-        "files": [
-            "./config/packages/notifier.yaml"
         ]
     },
     "symfony/phpunit-bridge": {

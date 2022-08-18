@@ -1,0 +1,235 @@
+{% extends 'base.html.twig' %}
+
+{% block navbar_ext %}
+    {{ include('default/partials/_navbar.html.twig') }}
+{% endblock %}
+
+{% block title %}{{ current_collection }} -{% endblock %}
+{% block navbar_title %}- {{ current_collection }}{% endblock %}
+
+{% block js_head %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/aplayer/1.10.1/APlayer.min.js"></script>
+{% endblock %}
+
+{% block js_body %}
+    {{ parent() }}
+
+    {{ include('default/partials/_utils_js.twig') }}
+
+<script type="application/javascript">
+  const baseUrl = '{{ asset('media/') }}';
+  const folders = {{ folders | serialize('json') | raw }};
+  const current_collection = '{{ current_collection }}';
+  const current_folder = '{{ current_folder }}';
+  const current_file = '{{ current_file }}';
+
+  let player = new APlayer({
+    container: document.getElementById('aplayer'),
+    audio: []
+  });
+
+  const getFolderFromLabel = (folderLabel) => {
+    for (const [_key, value] of Object.entries(folders)) {
+        if (value.dir === folderLabel) {
+          return value;
+        }
+    }
+
+    return null;
+  }
+
+  const filesFromFolder = (root, folderLabel) => {
+    const folder = getFolderFromLabel(folderLabel);
+
+    const files = [];
+
+    if (folder === null) {
+      return files;
+    }
+
+    for (const [_key, value] of Object.entries(folder.files)) {
+      files.push(
+        {
+            name: value.file,
+            url: `${baseUrl}${root}/${folder.dir}/${value.file}`,
+            artist: folder.dir,
+            cover: folder.cover ? `${baseUrl}${root}/${folder.cover}` : null
+        }
+      );
+    }
+
+    return files;
+  }
+
+  const getFiles = (root, folderLabel) => {
+    if (folderLabel) {
+      return filesFromFolder(root, folderLabel);
+    }
+
+    let files = [];
+
+    // all
+    for (const [key, _value] of Object.entries(folders)) {
+      files = [...files, ...filesFromFolder(root, key)];
+    }
+
+    return files;
+  };
+
+  const setPlayer = (files, random) => {
+    player = new APlayer({
+      container: document.getElementById('aplayer'),
+      loop: 'none',
+      order: random ? 'random' : 'list',
+      audio: files
+    });
+
+    player.play();
+  }
+</script>
+
+<script type="module">
+  import { createApp } from 'https://unpkg.com/petite-vue?module'
+
+  createApp({
+    // data
+    folders: folders,
+    selected_folder: current_folder || '{{ app.request.cookies.get('last_' ~ current_collection|url_encode) }}',
+    sort: '{{ app.request.cookies.get('sort', 'desc') }}',
+    // getters
+    get foldersSorted() {
+      if (this.sort === 'asc') {
+        return this.folders;
+      }
+
+      const descOrder = Object.keys(this.folders).reverse();
+      const folderSorted = {};
+
+      descOrder.forEach((folderId) => {
+        folderSorted[folderId] = this.folders[folderId];
+      });
+
+      return folderSorted;
+    },
+    // lifecycle
+    init() {
+      if (this.selected_folder) {
+        this.play(this.selected_folder, current_file);
+      }
+    },
+    // methods
+    toggleSort() {
+      this.sort = this.sort === 'asc' ? 'desc' : 'asc';
+      setCookie('sort', this.sort);
+    },
+    playAll(random) {
+      const files = getFiles(current_collection);
+      setPlayer(files, !!random);
+      this.selected_folder = null;
+    },
+    play(folderLabel, file) {
+      let files = getFiles(current_collection, folderLabel);
+
+      if (file) {
+        for (const value of files) {
+          if (value.name === file) {
+            files = [value];
+            break;
+          }
+        }
+      }
+
+      setPlayer(files);
+
+      setCookie(`last_${encodeURI(current_collection)}` , folderLabel);
+      /* const url = `${'{{ url('homepage', {collection: current_collection }) }}'}/${folderLabel}`;
+      window.history.pushState({}, '', url);*/
+
+      this.selected_folder = folderLabel;
+    },
+    prev() {
+      player.skipBack();
+    },
+    next() {
+      player.skipForward();
+    },
+    copyCurrentToClipboard(file) {
+      const index = player.list.index;
+      const playerData = player.options.audio[index];
+
+      if (playerData === undefined) {
+        return;
+      }
+
+      const suffix = file ? `/${playerData.name}` : '';
+
+      const url = `${'{{ url('homepage', {collection: current_collection }) }}'}/${playerData.artist}${suffix}`;
+      navigator.clipboard.writeText(url);
+    }
+  }).mount()
+</script>
+{% endblock %}
+
+{% block css_head %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aplayer/1.10.1/APlayer.min.css">
+{% endblock %}
+
+{% block body %}
+<main class="container-fluid">
+    <div class="row">
+        <div class="coL-12 col-sm-6 order-2 order-sm-1">
+            <table class="table table-striped table-hover align-middle">
+                <thead>
+                <tr v-scope @vue:mounted="init" v-cloak>
+                    <th scope="col" @click="toggleSort()">
+                        Folders
+                        <i class="bi" v-bind:class="{'bi-caret-down-fill': sort == 'desc', 'bi-caret-up-fill': sort == 'asc'}"></i>
+                    </th>
+                    <th scope="col" colspan="2" class="text-end w-35" v-scope v-cloak>
+                        <button type="button" class="btn btn-outline-secondary btn-sm play-all-btn" @click="playAll(true)"><i class="bi bi-shuffle"></i> Rand.</button>
+                        <button type="button" class="btn btn-secondary btn-sm play-all-btn" @click="playAll()"><i class="bi bi-play-circle"></i> All</button>
+                    </th>
+                </tr>
+                </thead>
+                <tbody v-scope v-cloak>
+                {% verbatim %}
+                    <tr v-for="(folder, key) in foldersSorted" v-bind:class="{'table-primary': folder.dir === selected_folder}">
+                        <td class="ps-2">{{ folder.dir }}</td>
+                        <td class="text-center w-10">{{ Object.keys(folder.files).length }}</td>
+                        <td class="text-end" >
+                            <button type="button" class="btn btn-secondary btn-sm play-btn" @click="play(folder.dir)"><i class="bi bi-play-circle"></i> Play</button>
+                        </td>
+                    </tr>
+                <tr v-if="folders.length === 0"><td colspan="3" class="text-center">No files :(</td></tr>
+                {% endverbatim %}
+                </tbody>
+            </table>
+
+        </div>
+        <div class="coL-12 col-sm-6 order-sm-2 order-1">
+            <div id="aplayer"></div>
+            <div class="d-flex justify-content-between mt-2 mx-1" v-scope v-cloak>
+                <div v-if="selected_folder">
+                    <button type="button" class="btn btn-outline-secondary btn-sm track-link" title="Copy current playing folder link to clipboard"
+                        @click="copyCurrentToClipboard()">
+                        <i class="bi bi-clipboard-fill"></i> <i class="bi bi-folder"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary btn-sm track-link" title="Copy current playing song link to clipboard"
+                        @click="copyCurrentToClipboard(true)">
+                        <i class="bi bi-clipboard-fill"></i> <i class="bi bi-file-earmark-music"></i>
+                    </button>
+                </div>
+                <div v-if="selected_folder">
+                    <button type="button" class="btn btn-outline-secondary btn-sm track-prev" title="Previous track" @click="prev()">
+                        <i class="bi bi-skip-backward-fill"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm track-next" title="Next track" @click="next()">
+                        <i class="bi bi-skip-forward-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

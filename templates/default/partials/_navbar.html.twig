@@ -1,0 +1,11 @@
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Folders
+    </a>
+    <ul class="dropdown-menu dropdown-menu-lg-end">
+        {% set collections = collections() %}
+        {% for collection in collections %}
+            <li><a class="dropdown-item{% if current_collection == collection.dir %} active{% endif %}" href="{{ url('homepage', {collection: collection.dir }) }}">{{ collection.dir }}</a></li>
+        {% endfor %}
+    </ul>
+</li>

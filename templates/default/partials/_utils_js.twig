@@ -1,0 +1,19 @@
+<script type="application/javascript">
+  const setCookie = (name, state) => {
+      {# imported from vue app #}
+    const COOKIE_PARAMS = {
+      path: '/',
+      'max-age': 31536000,
+      expires: 'mage-age',
+      secure: true,
+      SameSite: 'Lax'
+    };
+    // delete ?
+    if (state === undefined || state === null) {
+      document.cookie = `${name}=;path=${COOKIE_PARAMS.path};SameSite=${COOKIE_PARAMS.SameSite};secure=true;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+      return;
+    }
+    const opts = Object.keys(COOKIE_PARAMS).map(k => `;${k}=${COOKIE_PARAMS[k]}`).join('');
+    document.cookie = `${name}=${state}${opts}`;
+  };
+</script>
