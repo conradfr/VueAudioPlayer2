@@ -5,6 +5,8 @@ Exploring a simple audio player with petite-vue and no build step.
 
 [DEMO](https://vueaudioplayer.funkybits.fr)
 
+todo: integrate the player in the vue app.
+
 Dependencies
 --------------
 
