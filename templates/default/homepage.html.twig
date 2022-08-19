@@ -199,7 +199,9 @@
                         <td class="ps-2">{{ folder.dir }}</td>
                         <td class="text-center w-10">{{ Object.keys(folder.files).length }}</td>
                         <td class="text-end" >
-                            <button type="button" class="btn btn-secondary btn-sm play-btn" @click="play(folder.dir)"><i class="bi bi-play-circle"></i> Play</button>
+                            <button type="button" class="btn btn-secondary btn-sm play-btn" @click="play(folder.dir)">
+                                <i class="bi bi-play-circle"></i><span class="d-none d-sm-inline"> Play</span>
+                            </button>
                         </td>
                     </tr>
                 <tr v-if="folders.length === 0"><td colspan="3" class="text-center">No files :(</td></tr>
